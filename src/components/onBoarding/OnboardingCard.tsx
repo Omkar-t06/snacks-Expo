@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     heroImage: {
-        width: '100%',
-        height: '100%',
+        width: '92%',
+        height: '92%',
         resizeMode: 'cover',
     },
     description: {

@@ -1,20 +1,22 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Image, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View, FlatList, Image, Dimensions, NativeSyntheticEvent, NativeScrollEvent, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../../theme';
 import Oreo from '../../components/onBoarding/Oreo';
 import OnboardingCard from '../../components/onBoarding/OnboardingCard';
+import Chips from '../../components/onBoarding/Chip';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_INTERNAL_WIDTH = SCREEN_WIDTH - 40;
 
 export default function OnboardingScreen() {
     const theme = useTheme();
-    const { colors, roundness, shadows, typography, spacing } = theme;
+    const { colors, roundness, shadows, typography, spacing, palette } = theme;
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const onboardingData = [
         {
@@ -40,14 +42,42 @@ export default function OnboardingScreen() {
         },
     ];
 
-    // Track finger sliding movements to update the static indicator row smoothly
-    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-        const contentOffsetX = event.nativeEvent.contentOffset.x;
-        const newIndex = Math.round(contentOffsetX / CARD_INTERNAL_WIDTH);
+    const startAutoScroll = () => {
+        stopAutoScroll();
 
-        if (newIndex !== currentIndex && newIndex >= 0 && newIndex < onboardingData.length) {
-            setCurrentIndex(newIndex);
+        intervalRef.current = setInterval(() => {
+            const nextIndex =
+                currentIndex === onboardingData.length - 1
+                    ? 0
+                    : currentIndex + 1;
+
+            flatListRef.current?.scrollToIndex({
+                index: nextIndex,
+                animated: true,
+            });
+
+            setCurrentIndex(nextIndex);
+        }, 3000);
+    };
+
+    const stopAutoScroll = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
         }
+    };
+
+    useEffect(() => {
+        startAutoScroll();
+
+        return () => stopAutoScroll();
+    }, [currentIndex]);
+
+    const handleGetStarted = () => {
+        stopAutoScroll();
+    };
+
+    const handleSignIn = () => {
+        stopAutoScroll();
     };
 
     return (
@@ -89,7 +119,6 @@ export default function OnboardingScreen() {
                         );
                     })}
                 </View>
-
                 <FlatList
                     ref={flatListRef}
                     data={onboardingData}
@@ -99,16 +128,62 @@ export default function OnboardingScreen() {
                     snapToInterval={CARD_INTERNAL_WIDTH}
                     decelerationRate="fast"
                     showsHorizontalScrollIndicator={false}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
                     bounces={false}
+                    onTouchStart={stopAutoScroll}
+                    onTouchEnd={startAutoScroll}
+                    getItemLayout={(_, index) => ({
+                        length: CARD_INTERNAL_WIDTH,
+                        offset: CARD_INTERNAL_WIDTH * index,
+                        index,
+                    })}
+                    onMomentumScrollEnd={(event) => {
+                        const index = Math.round(
+                            event.nativeEvent.contentOffset.x /
+                            CARD_INTERNAL_WIDTH
+                        );
+
+                        setCurrentIndex(index);
+                    }}
                     renderItem={({ item }) => (
-                        <View style={{ width: CARD_INTERNAL_WIDTH, paddingRight: 20 }}>
+                        <View
+                            style={{
+                                width: CARD_INTERNAL_WIDTH,
+                                paddingRight: 20,
+                            }}
+                        >
                             <OnboardingCard item={item} />
                         </View>
                     )}
                 />
             </View>
+            <View style={styles.footerZone}>
+                <TouchableOpacity
+                    activeOpacity={0.85}
+                    style={[
+                        styles.getStartedButton,
+                        shadows.premium,
+                        { backgroundColor: palette.neutral[900], borderRadius: roundness.lg }
+                    ]}
+                    onPress={handleGetStarted}
+                >
+                    <Text style={[styles.getStartedText, { color: colors.textOnPrimary, fontFamily: typography.fonts.bold }]}>
+                        Join SnackExpo
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Securely Structured Horizontal Link Line Component row */}
+                <View style={styles.signInWrapper}>
+                    <Text style={[styles.memberLabel, { color: colors.textSecondary }]}>
+                        Already a member?{' '}
+                    </Text>
+                    <TouchableOpacity onPress={handleSignIn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                        <Text style={[styles.signInActionText, { color: colors.primary, fontFamily: typography.fonts.bold }]}>
+                            Sign In
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <Chips />
         </SafeAreaView>
     );
 }
@@ -121,6 +196,7 @@ const styles = StyleSheet.create({
     masterCard: {
         marginHorizontal: 20,
         marginTop: 24,
+        marginBottom: 12,
         paddingVertical: 20,
         paddingLeft: 20,
         overflow: 'hidden',
@@ -158,5 +234,32 @@ const styles = StyleSheet.create({
     indicatorTrack: {
         height: '100%',
         borderRadius: 2,
+    },
+    footerZone: {
+        marginVertical: 20,
+        width: '100%',
+    },
+    getStartedButton: {
+        height: 54,
+        marginHorizontal: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    getStartedText: {
+        fontSize: 16,
+        letterSpacing: 0.5,
+    },
+    signInWrapper: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    memberLabel: {
+        fontSize: 14,
+    },
+    signInActionText: {
+        fontSize: 14,
+        textDecorationLine: 'underline',
     }
 });
