@@ -8,7 +8,12 @@ import {
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold 
 } from '@expo-google-fonts/plus-jakarta-sans';
-import OnboardingScreen from './src/screens/Auth/OnboardingScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AuthStack from './src/navigation/AuthStack';
+import MainTab from './src/navigation/MainTab';
+import { AuthProvider, AuthContext } from './src/context/AuthContext';
+import { useContext } from 'react';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -27,11 +32,37 @@ export default function App() {
     );
   }
 
+  const RootStack = createNativeStackNavigator();
+
+  function AppRoutes() {
+    const { isLoading, userToken } = useContext(AuthContext);
+
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF5A1F" />
+        </View>
+      );
+    }
+
+    return (
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {userToken ? (
+          <RootStack.Screen name="Main" component={MainTab} />
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthStack} />
+        )}
+      </RootStack.Navigator>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <OnboardingScreen />
+    <AuthProvider>
+      <NavigationContainer>
+        <AppRoutes />
+      </NavigationContainer>
       <StatusBar style="auto" />
-    </View>
+    </AuthProvider>
   );
 }
 

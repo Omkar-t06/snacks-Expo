@@ -10,7 +10,7 @@ import Chips from '../../components/onBoarding/Chip';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_INTERNAL_WIDTH = SCREEN_WIDTH - 40;
 
-export default function OnboardingScreen() {
+export default function OnboardingScreen({ navigation }: any) {
     const theme = useTheme();
     const { colors, roundness, shadows, typography, spacing, palette } = theme;
 
@@ -74,10 +74,12 @@ export default function OnboardingScreen() {
 
     const handleGetStarted = () => {
         stopAutoScroll();
+        navigation.replace('SignUp');
     };
 
     const handleSignIn = () => {
         stopAutoScroll();
+        navigation.replace('Login');
     };
 
     return (
