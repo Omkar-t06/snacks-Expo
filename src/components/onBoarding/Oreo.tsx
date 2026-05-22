@@ -39,10 +39,10 @@ const CREAM_COLOR = '#FFF4D8';
 const styles = StyleSheet.create({
     oreoWrapper: {
         position: 'absolute',
-        top: -5,
-        right: -20,
-        width: 240,
-        height: 240,
+        top: 10,
+        right: -10,
+        width: 190,
+        height: 190,
         justifyContent: 'center',
         alignItems: 'center',
         transform: [{ rotate: '-18deg' }],

@@ -26,10 +26,10 @@ const LoginScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Oreo />
 
-      <View style={[styles.inner, { padding: spacing.md }]}> 
+      <View style={[styles.inner, { padding: spacing.md }]}>
         <Text style={[styles.headerTitle, { color: colors.text, fontFamily: typography.fonts.bold }]}>Welcome Back</Text>
         <Text style={[styles.headerSub, { color: colors.textSecondary }]}>Sign in to continue ordering your favorites</Text>
 

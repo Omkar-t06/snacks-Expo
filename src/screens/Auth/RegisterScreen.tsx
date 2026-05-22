@@ -27,10 +27,10 @@ const RegisterScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Oreo />
 
-      <View style={[styles.inner, { padding: spacing.md }]}> 
+      <View style={[styles.inner, { padding: spacing.md }]}>
         <Text style={[styles.headerTitle, { color: colors.text, fontFamily: typography.fonts.bold }]}>Create Account</Text>
         <Text style={[styles.headerSub, { color: colors.textSecondary }]}>Join SnackExpo to start ordering</Text>
 
