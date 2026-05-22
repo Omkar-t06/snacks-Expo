@@ -11,7 +11,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthStack from './src/navigation/AuthStack';
-import MainTab from './src/navigation/MainTab';
+import AppDrawer from './src/navigation/AppDrawer';
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { useContext } from 'react';
 
@@ -48,7 +48,7 @@ export default function App() {
     return (
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {userToken ? (
-          <RootStack.Screen name="Main" component={MainTab} />
+          <RootStack.Screen name="Main" component={AppDrawer} />
         ) : (
           <RootStack.Screen name="Auth" component={AuthStack} />
         )}
