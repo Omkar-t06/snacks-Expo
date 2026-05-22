@@ -1,112 +1,148 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Image } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { StyleSheet, Text, View, ScrollView, Pressable, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AuthContext } from '../../context/AuthContext';
 import { useTheme } from '../../theme';
-import CartItem from '../../components/Main/CartItem';
-import EmptyState from '../../components/Main/EmptyState';
+import { AuthContext } from '../../context/AuthContext';
 
-type CartItem = {
-  id?: string;
-  name?: string;
-  price?: number;
-  image?: string;
-  quantity?: number;
-};
+const FILTER_TABS = ['All', 'Ongoing', 'Delivered', 'Cancelled'];
 
-export default function CartScreen({ navigation }: { navigation: any }) {
-  // Assuming your context provides an explicit item map or update quantities handler
-  const ctx = useContext(AuthContext) as any;
-  const { cart: rawCart, addToCart, removeFromCart, clearCart } = ctx;
-  const cart: CartItem[] = (rawCart as CartItem[]) || [];
+
+export default function OrdersScreen() {
+  const [activeTab, setActiveTab] = useState('All');
   const theme = useTheme();
   const { colors, roundness, typography, spacing, shadows } = theme;
 
-  // Compute clean financial summaries matching wireframe values
-  const subtotal = cart.reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
-  const deliveryFee = subtotal > 0 ? 20 : 0;
-  const platformFee = subtotal > 0 ? 10 : 0;
-  const totalAmount = subtotal + deliveryFee + platformFee;
+  const { orders } = useContext(AuthContext);
+
+  // Filter logic based on active top-bar filter selection
+  const filteredOrders = (orders || []).filter((order) => {
+    if (activeTab === 'All') return true;
+    return order.status.toLowerCase() === activeTab.toLowerCase();
+  });
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
-      <FlatList
-        data={cart}
-        keyExtractor={(item, index) => item.id ? `cart-${item.id}-${index}` : String(index)}
-        contentContainerStyle={{ padding: spacing.md }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={() => (
-          <EmptyState title="Your basket feels remarkably light." subtitle="Add items from restaurants to get started." />
-        )}
-        renderItem={({ item }: { item: CartItem }) => (
-          <CartItem item={item} onAdd={(it) => addToCart(it)} onRemove={(id) => removeFromCart(id)} />
-        )}
-        ListFooterComponent={() => subtotal > 0 ? (
-          <View style={{ marginTop: spacing.md }}>
-            {/* Coupon Option Input Row Block */}
-            <Pressable style={[styles.couponRow, { backgroundColor: colors.surface, borderRadius: roundness.sm, borderColor: colors.divider }]}>
-              <View style={styles.flexRow}>
-                <Ionicons name="pricetag-outline" size={18} color={colors.primary} style={{ marginRight: 8 }} />
-                <Text style={[styles.couponText, { color: colors.textSecondary }]}>Add a coupon</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </Pressable>
 
-            {/* Bill Summary Breakdowns Card */}
-            <View style={[styles.summaryBox, { backgroundColor: colors.surface, borderRadius: roundness.md, padding: spacing.md, marginTop: spacing.md }]}>
-              <View style={styles.summaryLine}><Text style={{ color: colors.textSecondary }}>Subtotal</Text><Text style={{ color: colors.text }}>₹{subtotal}</Text></View>
-              <View style={styles.summaryLine}><Text style={{ color: colors.textSecondary }}>Delivery Fee</Text><Text style={{ color: colors.text }}>₹{deliveryFee}</Text></View>
-              <View style={styles.summaryLine}><Text style={{ color: colors.textSecondary }}>Platform Fee</Text><Text style={{ color: colors.text }}>₹{platformFee}</Text></View>
-              <View style={[styles.divider, { backgroundColor: colors.divider }]} />
-              <View style={styles.summaryLine}>
-                <Text style={{ color: colors.text, fontWeight: '700' }}>Total</Text>
-                <Text style={{ color: colors.text, fontWeight: '700' }}>₹{totalAmount}</Text>
+      {/* 1. Horizontal Category Filter Chips Matrix Row */}
+      <View style={styles.filterScrollWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[styles.filterContentContainer, { paddingHorizontal: spacing.md }]}
+        >
+          {FILTER_TABS.map((tab, idx) => {
+            const isSelected = tab === activeTab;
+            return (
+              <Pressable
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={[
+                  styles.filterTab,
+                  {
+                    backgroundColor: isSelected ? colors.primaryLight : colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.divider,
+                    borderRadius: roundness.full,
+                    marginRight: idx === FILTER_TABS.length - 1 ? 0 : spacing.xs
+                  }
+                ]}
+              >
+                <Text style={[
+                  styles.filterTabText,
+                  {
+                    color: isSelected ? colors.primary : colors.textSecondary,
+                    fontFamily: isSelected ? typography.fonts.bold : typography.fonts.regular
+                  }
+                ]}>
+                  {tab}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* 2. Historical Orders Dynamic Feed */}
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xl }}
+        showsVerticalScrollIndicator={false}
+      >
+        {filteredOrders.length > 0 ? (
+          filteredOrders.map((order) => (
+            <View
+              key={order.id}
+              style={[
+                styles.orderCard,
+                shadows.subtle,
+                { backgroundColor: colors.surface, borderRadius: roundness.md, padding: spacing.md }
+              ]}
+            >
+              {/* Card Top Row Header Information */}
+              <View style={styles.orderHeaderRow}>
+                <View style={styles.headerInfoGroup}>
+                  <Text style={[styles.orderIdText, { color: colors.text, fontFamily: typography.fonts.bold }]}>
+                    Order #{order.id}
+                  </Text>
+                  <Text style={[styles.orderDateText, { color: colors.textMuted }]}>
+                    {order.date}
+                  </Text>
+                </View>
+                <Text style={[styles.statusBadgeText, { color: order.statusColor, fontFamily: typography.fonts.bold }]}>
+                  {order.status}
+                </Text>
+              </View>
+
+              {/* Items Summary Sub-Surface Block Layer */}
+              <View style={[styles.itemsPreviewRow, { backgroundColor: colors.background, borderRadius: roundness.sm, padding: spacing.sm }]}>
+                <Ionicons name="fast-food-outline" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
+                <Text numberOfLines={1} style={[styles.summaryText, { color: colors.textSecondary, fontFamily: typography.fonts.medium }]}>
+                  {order.itemsSummary}
+                </Text>
+              </View>
+
+              {/* Card Footer Financial Summary Area */}
+              <View style={styles.orderFooterRow}>
+                <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
+                  Total: <Text style={{ color: colors.text, fontWeight: '700' }}>₹{order.price}</Text>
+                </Text>
+                <Pressable style={styles.detailsBtn} hitSlop={8}>
+                  <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 13, marginRight: 6 }}>View Details</Text>
+                  <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+                </Pressable>
               </View>
             </View>
-
-            {/* Primary Action Target Submit Control */}
-            <Pressable 
-              style={({ pressed }) => [
-                styles.checkoutBtn, 
-                shadows.premium,
-                { backgroundColor: colors.primary, borderRadius: roundness.md, opacity: pressed ? 0.9 : 1 }
-              ]}
-              onPress={() => {
-                alert("Order submitted successfully!");
-                clearCart();
-                navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
-              }}
-            >
-              <Text style={[styles.checkoutBtnText, { color: colors.textOnPrimary, fontFamily: typography.fonts.bold }]}>
-                Proceed to Checkout
-              </Text>
-            </Pressable>
+          ))
+        ) : (
+          /* Empty Filter Fallback Interface State */
+          <View style={styles.emptyContainer}>
+            <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary, marginTop: spacing.sm }]}>
+              No {activeTab.toLowerCase()} orders found.
+            </Text>
           </View>
-        ) : null}
-      />
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  flexRow: { flexDirection: 'row', alignItems: 'center' },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 100 },
-  emptyText: { fontSize: 15, marginTop: 16, textAlign: 'center', width: '80%' },
-  cartCard: { flexDirection: 'row', padding: 12, marginBottom: 12, alignItems: 'center' },
-  productImage: { width: 68, height: 68, borderRadius: 8 },
-  cardInfo: { flex: 1, marginLeft: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  itemName: { fontSize: 15 },
-  itemPrice: { fontSize: 13, marginTop: 2 },
-  stepperContainer: { flexDirection: 'row', alignItems: 'center', height: 32, paddingHorizontal: 4 },
-  stepBtn: { width: 28, height: 28, justifyContent: 'center', alignItems: 'center' },
-  quantityText: { paddingHorizontal: 8, fontSize: 14 },
-  couponRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderWidth: 1 },
-  couponText: { fontSize: 14 },
-  summaryBox: { width: '100%' },
-  summaryLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  divider: { height: 1, width: '100%', marginVertical: 8 },
-  checkoutBtn: { height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 30 },
-  checkoutBtnText: { fontSize: 16 }
+  filterScrollWrapper: { width: '100%' },
+  filterContentContainer: { paddingVertical: 12 },
+  filterTab: { paddingVertical: 6, paddingHorizontal: 16, borderWidth: 1 },
+  filterTabText: { fontSize: 13 },
+  orderCard: { marginBottom: 14 },
+  orderHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  headerInfoGroup: { flex: 1, paddingRight: 12 },
+  orderIdText: { fontSize: 15 },
+  orderDateText: { fontSize: 11, marginTop: 2 },
+  statusBadgeText: { fontSize: 13 },
+  itemsPreviewRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 12 },
+  summaryText: { fontSize: 13, flex: 1 },
+  orderFooterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 },
+  totalLabel: { fontSize: 13 },
+  detailsBtn: { flexDirection: 'row', alignItems: 'center' },
+  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 80 },
+  emptyText: { fontSize: 14 },
 });

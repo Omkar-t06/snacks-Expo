@@ -32,7 +32,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         shadows.subtle,
         { backgroundColor: colors.surface, borderRadius: roundness.md }
       ]}
-      onPress={() => navigation.navigate('RestaurantDetail', { id: item.id, name: item.name, price: item.price || '$$' })}
+      onPress={() => navigation.navigate('RestaurantDetail', { id: item.id, name: item.name, price: item.price || '$$', image: item.image })}
     >
       <Image source={{ uri: item.image }} style={styles.topCardImage} />
       <View style={styles.topCardBody}>
@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               <Ionicons name="chevron-down" size={14} color={colors.text} style={{ marginLeft: 4 }} />
             </View>
             <Text style={[styles.addressText, { color: colors.text, fontFamily: typography.fonts.bold }]}>
-              12, Park Street, Bangalore
+              32/12, Konta, Chhattisgarh
             </Text>
           </View>
           <Pressable style={styles.notificationBtn}>
@@ -118,7 +118,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           Popular Near You
         </Text>
         {restaurants.map((item: any) => (
-          <Pressable key={`popular-${item.id}`} onPress={() => navigation.navigate('RestaurantDetail', { id: item.id, name: item.name, price: item.price || '$$' })}>
+          <Pressable key={`popular-${item.id}`} onPress={() => navigation.navigate('RestaurantDetail', { id: item.id, name: item.name, price: item.price || '$$', image: item.image })}>
             <RestaurantCard item={item} onAdd={(it) => (addToCart as any)(it.menu?.[0] || it)} />
           </Pressable>
         ))}

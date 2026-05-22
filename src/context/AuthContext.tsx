@@ -12,6 +12,16 @@ export interface CartItem {
     [key: string]: any;
 }
 
+export interface OrderItem {
+    id: string;
+    date: string;
+    status: 'Delivered' | 'Ongoing' | 'Cancelled';
+    statusColor: string;
+    itemsSummary: string;
+    itemCount: number;
+    price: number;
+}
+
 export interface AuthContextType {
     userToken: string | null;
     user: User | null;
@@ -32,6 +42,9 @@ export interface AuthContextType {
         id: string | number
     ) => void;
     clearCart: () => void;
+    // Orders
+    orders: OrderItem[];
+    addOrder: (order: OrderItem) => void;
 }
 
 interface AuthProviderProps {
@@ -51,6 +64,9 @@ export const AuthContext = createContext<AuthContextType>({
     addToCart: (item: CartItem) => {},
     removeFromCart: (id: string | number) => {},
     clearCart: () => {},
+    // orders
+    orders: [],
+    addOrder: (order: OrderItem) => {},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -60,6 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [orders, setOrders] = useState<OrderItem[]>([]);
 
     // Restore session on app start
     useEffect(() => {
@@ -77,6 +94,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
                 if (storedUser) {
                     setUser(JSON.parse(storedUser));
+                }
+
+                const storedOrders = await AsyncStorage.getItem('orders');
+                if (storedOrders) {
+                    setOrders(JSON.parse(storedOrders));
                 }
             } catch (error) {
                 console.error(
@@ -263,6 +285,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setCart([]);
     };
 
+    // ORDERS
+    const addOrder = async (order: OrderItem) => {
+        setOrders((prev) => {
+            const next = [order, ...prev];
+            AsyncStorage.setItem('orders', JSON.stringify(next)).catch((e) => console.error('Failed to persist orders', e));
+            return next;
+        });
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -281,6 +312,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 addToCart,
                 removeFromCart,
                 clearCart,
+                // Orders
+                orders,
+                addOrder,
             }}
         >
             {children}
