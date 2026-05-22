@@ -1,28 +1,64 @@
-import React, { createContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const AuthContext = createContext({
+export interface User {
+    name: string;
+    email: string;
+}
+
+export interface CartItem {
+    id: string | number;
+    [key: string]: any;
+}
+
+export interface AuthContextType {
+    userToken: string | null;
+    user: User | null;
+    isLoading: boolean;
+    login: (
+        email: string,
+        password: string
+    ) => Promise<void>;
+    signUp: (
+        name: string,
+        email: string,
+        password: string
+    ) => Promise<void>;
+    logout: () => Promise<void>;
+    cart: CartItem[];
+    addToCart: (item: CartItem) => void;
+    removeFromCart: (
+        id: string | number
+    ) => void;
+    clearCart: () => void;
+}
+
+interface AuthProviderProps {
+    children: ReactNode;
+}
+
+export const AuthContext = createContext<AuthContextType>({
     userToken: null,
     user: null,
     isLoading: true,
     // auth functions (stubs)
-    login: async (email, password) => {},
-    signUp: async (name, email, password) => {},
+    login: async (email: string, password: string) => {},
+    signUp: async (name: string, email: string, password: string) => {},
     logout: async () => {},
     // cart
     cart: [],
-    addToCart: () => {},
-    removeFromCart: () => {},
+    addToCart: (item: CartItem) => {},
+    removeFromCart: (id: string | number) => {},
     clearCart: () => {},
 });
 
-export const AuthProvider = ({ children }) => {
-    const [userToken, setUserToken] = useState(null);
-    const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const [userToken, setUserToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState<CartItem[]>([]);
 
     // Restore session on app start
     useEffect(() => {
@@ -30,11 +66,9 @@ export const AuthProvider = ({ children }) => {
             setIsLoading(true);
 
             try {
-                const token =
-                    await AsyncStorage.getItem('userToken');
+                const token = await AsyncStorage.getItem('userToken');
 
-                const storedUser =
-                    await AsyncStorage.getItem('user');
+                const storedUser = await AsyncStorage.getItem('user');
 
                 if (token) {
                     setUserToken(token);
@@ -58,9 +92,9 @@ export const AuthProvider = ({ children }) => {
 
     // SIGN UP
     const signUp = async (
-        name,
-        email,
-        password
+        name: string,
+        email: string,
+        password: string
     ) => {
         setIsLoading(true);
 
@@ -113,7 +147,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     // LOGIN
-    const login = async (email, password) => {
+    const login = async (email: string, password: string) => {
         setIsLoading(true);
 
         try {
@@ -193,11 +227,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     // CART
-    const addToCart = (item) => {
+    const addToCart = (item: CartItem) => {
         setCart((prev) => [...prev, item]);
     };
 
-    const removeFromCart = (id) => {
+    const removeFromCart = (id: string | number) => {
         setCart((prev) =>
             prev.filter((item) => item.id !== id)
         );

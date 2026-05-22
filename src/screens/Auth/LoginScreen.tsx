@@ -17,7 +17,12 @@ const LoginScreen = ({ navigation }: any) => {
     setLoading(true)
     try {
       await login(email.trim(), password)
-      navigation.replace('Main')
+      // If this navigator is nested, call parent to replace the root route
+      if (navigation.getParent && navigation.getParent()) {
+        navigation.getParent().replace('Main')
+      } else {
+        navigation.replace('Main')
+      }
     } catch (err: any) {
       Alert.alert('Login failed', err.message || String(err))
     } finally {
