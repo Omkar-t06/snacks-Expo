@@ -45,6 +45,7 @@ export interface AuthContextType {
     // Orders
     orders: OrderItem[];
     addOrder: (order: OrderItem) => void;
+    updateOrderStatus: (id: string, status: OrderItem['status'], statusColor?: string) => void;
 }
 
 interface AuthProviderProps {
@@ -67,6 +68,7 @@ export const AuthContext = createContext<AuthContextType>({
     // orders
     orders: [],
     addOrder: (order: OrderItem) => {},
+    updateOrderStatus: (id: string, status: OrderItem['status'], statusColor?: string) => {},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -294,6 +296,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
     };
 
+    const updateOrderStatus = async (id: string, status: OrderItem['status'], statusColor?: string) => {
+        setOrders((prev) => {
+            const next = prev.map((o) => o.id === id ? { ...o, status, statusColor: statusColor || o.statusColor } : o);
+            AsyncStorage.setItem('orders', JSON.stringify(next)).catch((e) => console.error('Failed to persist orders', e));
+            return next;
+        });
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -315,6 +325,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 // Orders
                 orders,
                 addOrder,
+                updateOrderStatus,
             }}
         >
             {children}

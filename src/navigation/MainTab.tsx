@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeStack from './HomeStack';
 import SearchScreen from '../screens/Main/SearchScreen';
 import OrdersScreen from '../screens/Main/OrdersScreen';
+import OrdersStack from './OrdersStack';
 import ProfileScreen from '../screens/Main/ProfileScreen';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../theme';
@@ -56,7 +57,7 @@ export default function MainTab() {
       />
       <Tab.Screen
         name="Orders"
-        component={OrdersScreen}
+        component={OrdersStack}
         options={{
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="shopping-cart" size={size ?? 22} color={color} />

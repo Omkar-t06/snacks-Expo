@@ -8,7 +8,7 @@ import { AuthContext } from '../../context/AuthContext';
 const FILTER_TABS = ['All', 'Ongoing', 'Delivered', 'Cancelled'];
 
 
-export default function OrdersScreen() {
+export default function OrdersScreen({ navigation }: { navigation: any }) {
   const [activeTab, setActiveTab] = useState('All');
   const theme = useTheme();
   const { colors, roundness, typography, spacing, shadows } = theme;
@@ -105,7 +105,7 @@ export default function OrdersScreen() {
                 <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
                   Total: <Text style={{ color: colors.text, fontWeight: '700' }}>₹{order.price}</Text>
                 </Text>
-                <Pressable style={styles.detailsBtn} hitSlop={8}>
+                <Pressable style={styles.detailsBtn} hitSlop={8} onPress={() => navigation.navigate('OrderDetail', { order })}>
                   <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 13, marginRight: 6 }}>View Details</Text>
                   <Ionicons name="chevron-forward" size={14} color={colors.primary} />
                 </Pressable>
