@@ -8,6 +8,7 @@ export interface User {
 
 export interface CartItem {
     id: string | number;
+    quantity?: number;
     [key: string]: any;
 }
 
@@ -228,13 +229,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // CART
     const addToCart = (item: CartItem) => {
-        setCart((prev) => [...prev, item]);
+        setCart((prev) => {
+            const idx = prev.findIndex((i) => i.id === item.id);
+            if (idx !== -1) {
+                return prev.map((i, index) =>
+                    index === idx ? { ...i, quantity: (i.quantity || 1) + 1 } : i
+                );
+            }
+
+            return [...prev, { ...item, quantity: 1 }];
+        });
     };
 
     const removeFromCart = (id: string | number) => {
-        setCart((prev) =>
-            prev.filter((item) => item.id !== id)
-        );
+        setCart((prev) => {
+            const idx = prev.findIndex((i) => i.id === id);
+            if (idx === -1) return prev;
+
+            const found = prev[idx];
+            const qty = found.quantity || 1;
+
+            if (qty > 1) {
+                return prev.map((i, index) =>
+                    index === idx ? { ...i, quantity: qty - 1 } : i
+                );
+            }
+
+            return prev.filter((i) => i.id !== id);
+        });
     };
 
     const clearCart = () => {

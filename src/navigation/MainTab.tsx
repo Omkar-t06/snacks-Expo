@@ -13,8 +13,10 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const Tab = createBottomTabNavigator();
 
 export default function MainTab() {
-  const { cart } = useContext(AuthContext);
+  const { cart } = useContext(AuthContext) as any;
   const theme = useTheme();
+
+  const totalCount = (cart || []).reduce((s: number, i: any) => s + (i.quantity || 1), 0);
 
   return (
     <Tab.Navigator
@@ -59,7 +61,7 @@ export default function MainTab() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="shopping-cart" size={size ?? 22} color={color} />
           ),
-          tabBarBadge: cart && cart.length ? cart.length : undefined,
+          tabBarBadge: totalCount > 0 ? totalCount : undefined,
         }}
       />
       <Tab.Screen

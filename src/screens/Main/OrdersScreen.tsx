@@ -12,6 +12,7 @@ type CartItem = {
   name?: string;
   price?: number;
   image?: string;
+  quantity?: number;
 };
 
 export default function CartScreen({ navigation }: { navigation: any }) {
@@ -23,7 +24,7 @@ export default function CartScreen({ navigation }: { navigation: any }) {
   const { colors, roundness, typography, spacing, shadows } = theme;
 
   // Compute clean financial summaries matching wireframe values
-  const subtotal = cart.reduce((acc, item) => acc + (item.price || 0), 0);
+  const subtotal = cart.reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
   const deliveryFee = subtotal > 0 ? 20 : 0;
   const platformFee = subtotal > 0 ? 10 : 0;
   const totalAmount = subtotal + deliveryFee + platformFee;

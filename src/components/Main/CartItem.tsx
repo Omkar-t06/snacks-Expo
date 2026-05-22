@@ -23,7 +23,7 @@ export default function CartItem({ item, onAdd, onRemove }: Props) {
         <Pressable onPress={() => onRemove && onRemove(item.id)} style={styles.iconBtn}>
           <Ionicons name="remove" size={18} color={theme.colors.text} />
         </Pressable>
-        <Text style={{ marginHorizontal: 8, color: theme.colors.text }}>1</Text>
+        <Text style={{ marginHorizontal: 8, color: theme.colors.text }}>{item.quantity ?? 1}</Text>
         <Pressable onPress={() => onAdd && onAdd(item)} style={styles.iconBtn}>
           <Ionicons name="add" size={18} color={theme.colors.text} />
         </Pressable>
