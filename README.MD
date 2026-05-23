@@ -113,10 +113,9 @@ npx expo start
 
 ## Demo
 
-<video width="640" height="360" controls>
-  <source src="./assets/demo/demo-snack-expo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+## 🎥 Demo Video
+
+[![SnackExpo Demo](./assets/demo/demo-thumbnail.png)](./assets/demo/demo-snack-expo.mp4)
 
 ## 👨‍💻 Author
 
