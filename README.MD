@@ -115,7 +115,7 @@ npx expo start
 
 ## 🎥 Demo Video
 
-[![SnackExpo Demo](./assets/demo/demo-thumbnail.png)](./assets/demo/demo-snack-expo.mp4)
+[![SnackExpo Demo](./assets/demo/demo-thumbnail.png)](https://youtube.com/shorts/gQ_L3Zpe1j0?feature=share)
 
 ## 👨‍💻 Author
 
