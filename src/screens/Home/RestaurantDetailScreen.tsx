@@ -128,7 +128,7 @@ export default function RestaurantDetailScreen({ route, navigation }: { route: a
                   ]}
                 >
                   <Text style={[styles.addBtnText, { color: colors.textOnPrimary, fontFamily: typography.fonts.bold }]}>
-                    Add +
+                    Add
                   </Text>
                 </Pressable>
               </View>

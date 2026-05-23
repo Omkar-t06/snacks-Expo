@@ -15,6 +15,8 @@ import AppDrawer from './src/navigation/AppDrawer';
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { useContext } from 'react';
 
+const RootStack = createNativeStackNavigator();
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     'PlusJakartaSans-Regular': PlusJakartaSans_400Regular,
@@ -31,8 +33,6 @@ export default function App() {
       </View>
     );
   }
-
-  const RootStack = createNativeStackNavigator();
 
   function AppRoutes() {
     const { isLoading, userToken } = useContext(AuthContext);
